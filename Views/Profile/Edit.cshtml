@@ -1,0 +1,137 @@
+@model mvc.ViewModels.EditVM
+@{
+    ViewData["Title"] = "Edit Profile";
+		var imgsrc = Model.ImageUrl == null ? "/images/default-profile.png" : $"/images/user/{Model.ImageUrl}";
+}
+<link rel="stylesheet" href="/css/profile.css">
+
+<div class="container py-5">
+    <div class="profile-card p-4">
+
+        <h4 class="mb-4" style="color: cyan;">
+            <i class="bi bi-pencil-fill me-2"></i>Edit Profile
+        </h4>
+
+        <form asp-action="Edit" asp-controller="Profile" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+            <div class="text-center mb-4">
+                <img id="imagePreview"
+                     class="profile-img mb-2"
+                     src="@imgsrc" />
+                <div>
+                    <label class="btn btn-outline-cyan btn-sm mt-2">
+                        <i class="bi bi-camera-fill"></i> Change Photo
+                        <input type="file" asp-for="Image" accept="image/*" hidden onchange="previewImage(event)" />
+                    </label>
+                    <span asp-validation-for="Image" class="text-danger d-block small mt-1"></span>
+                </div>
+            </div>
+
+            <hr style="border-color: rgba(0,255,255,0.2);" />
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="FirstName" class="form-label text-white-50">First Name</label>
+                    <input asp-for="FirstName" class="form-control edit-input" placeholder="First name" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LasttName" class="form-label text-white-50">Last Name</label>
+                    <input asp-for="LasttName" class="form-control edit-input" placeholder="Last name" />
+                    <span asp-validation-for="LasttName" class="text-danger small"></span>
+                </div>
+            </div>
+
+						<div class="mb-3">
+								<label asp-for="Gender" class="form-label text-white-50">
+										Gender
+								</label>
+								<select asp-for="Gender"
+												asp-items="Html.GetEnumSelectList<GenderType>()"
+												class="form-select edit-input">
+										<option value="">Select Gender</option>
+								</select>
+								<span asp-validation-for="Gender" class="text-danger small"></span>
+						</div>
+
+            <div class="mb-3">
+                <label asp-for="UserName" class="form-label text-white-50">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text edit-input-prefix">@@</span>
+                    <input asp-for="UserName" class="form-control edit-input" placeholder="username" />
+                </div>
+                <span asp-validation-for="UserName" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+								<label asp-for="BirthDate" class="form-label text-white-50">Birth Date</label>
+								<input asp-for="BirthDate" type="date" class="form-control edit-input"
+										value="@(Model.BirthDate.HasValue ? Model.BirthDate.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+								<span asp-validation-for="BirthDate" class="text-danger small"></span>
+						</div>
+
+            <div class="mb-3">
+                <label asp-for="About" class="form-label text-white-50">Bio</label>
+                <textarea asp-for="About" class="form-control edit-input" rows="3" placeholder="Tell us about yourself..."></textarea>
+                <span asp-validation-for="About" class="text-danger small"></span>
+            </div>
+
+            <hr style="border-color: rgba(0,255,255,0.2);" />
+
+            <h6 class="mb-3" style="color: cyan;">
+                <i class="bi bi-geo-alt-fill me-1"></i>Address
+            </h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label text-white-50">Country</label>
+                    <input asp-for="Address.Country" class="form-control edit-input" placeholder="Country" />
+                    <span asp-validation-for="Address.Country" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white-50">State</label>
+                    <input asp-for="Address.State" class="form-control edit-input" placeholder="State" />
+                    <span asp-validation-for="Address.State" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white-50">City</label>
+                    <input asp-for="Address.City" class="form-control edit-input" placeholder="City" />
+                    <span asp-validation-for="Address.City" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white-50">Street</label>
+                    <input asp-for="Address.Street" class="form-control edit-input" placeholder="Street" />
+                    <span asp-validation-for="Address.Street" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-cyan">
+                    <i class="bi bi-check-lg me-1"></i>Save Changes
+                </button>
+                <a asp-action="Index" asp-controller="Profile"
+                   asp-route-username="@Model.UserName"
+                   class="btn btn-outline-cyan">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            document.getElementById('imagePreview').src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

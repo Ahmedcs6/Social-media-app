@@ -1,0 +1,137 @@
+@model mvc.ViewModels.ProfileVM
+@{
+    ViewData["Title"] = Model.UserName;
+    var gender = "N/A";
+    if (Model.Gender == GenderType.Male)
+        gender = "Male";
+    if (Model.Gender == GenderType.Female)
+        gender = "Female";
+
+    var isOwner = User.Identity.Name == Model.UserName;
+}
+<link rel="stylesheet" href="/css/profile.css">
+<div class="container py-5">
+    <div class="profile-card p-4 position-relative">
+				<a href="/" class="btn btn-outline-cyan btn-sm mb-3">
+								<i class="bi bi-house-fill"></i> Home
+						</a>
+
+
+        @if (isOwner)
+        {
+            <a href="/Profile/Edit" class="btn btn-outline-cyan btn-sm edit-profile-btn">
+                <i class="bi bi-pencil-fill"></i> Edit Profile
+            </a>
+        }
+
+        <div class="row align-items-center">
+
+            <div class="col-md-3 text-center">
+                <img class="profile-img"
+                     src="@(string.IsNullOrEmpty(Model.ImageUrl)
+                        ? "/images/default-profile.png"
+                        : $"/images/user/{Model.ImageUrl}")" />
+            </div>
+
+            <div class="col-md-9">
+                <h2>@Model.FullName</h2>
+                <h5 class="username">@@@Model.UserName</h5>
+
+                <div class="d-flex gap-4 mt-3">
+                    <div class="stat-box">
+                        <strong>@Model.FollowersNumber</strong><br />
+                        <span>Followers</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong>@Model.FollowingsNumber</strong><br />
+                        <span>Following</span>
+                    </div>
+                </div>
+
+                <hr style="border-color: rgba(0,255,255,0.2);" />
+
+                <p>
+                    @(string.IsNullOrWhiteSpace(Model.About)
+                        ? "No bio available."
+                        : Model.About)
+                </p>
+
+                <div class="d-flex gap-2 mt-3 align-items-center">
+                    @if (!isOwner)
+                    {
+												if(Model.IsFollowing)
+												{
+														<form asp-controler="Profile" asp-action="Unfollow" asp-route-userName="@Model.UserName"  method="post">
+														@Html.AntiForgeryToken()
+														<button type="submit" class="btn btn-cyan">Unfollow</button>
+														</form>
+												}
+												else 
+												{
+														<form asp-controler="Profile" asp-action="Follow" asp-route-userName="@Model.UserName"  method="post">
+														@Html.AntiForgeryToken()
+														<button type="submit" class="btn btn-cyan">Follow</button>
+														</form>
+												}
+										}
+                    <div class="details-wrapper">
+                        <button class="btn btn-outline-cyan" onclick="toggleDetails(event)">
+                            <i class="bi bi-info-circle"></i> Details
+                        </button>
+                        <div class="details-popup" id="detailsPopup">
+                            <div class="details-item">
+                                <i class="bi bi-person-fill"></i>
+                                <span>@gender</span>
+                            </div>
+                            <div class="details-item">
+                                <i class="bi bi-cake2-fill"></i>
+                                <span>
+                                    @(Model.BirthDate.HasValue
+                                        ? Model.BirthDate.Value.ToString("MMM dd, yyyy")
+                                        : "N/A")
+                                </span>
+                            </div>
+                            <div class="details-item">
+                                <i class="bi bi-hourglass-split"></i>
+                                <span>
+                                    @(Model.BirthDate.HasValue
+                                        ? (DateTime.Today.Year - Model.BirthDate.Value.Year -
+                                           (DateTime.Today.DayOfYear < Model.BirthDate.Value.DayOfYear ? 1 : 0))
+                                           + " years old"
+                                        : "N/A")
+                                </span>
+                            </div>
+                            <div class="details-item">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                <span>
+                                    @{
+                                        var addressParts = new[]
+                                        {
+                                            Model.Address?.Street,
+                                            Model.Address?.City,
+                                            Model.Address?.State,
+                                            Model.Address?.Country
+                                        }.Where(s => !string.IsNullOrWhiteSpace(s));
+                                    }
+                                    @(addressParts.Any() ? string.Join(", ", addressParts) : "N/A")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDetails(e) {
+        e.stopPropagation();
+        const popup = document.getElementById('detailsPopup');
+        popup.classList.toggle('show');
+    }
+
+    document.addEventListener('click', () => {
+        document.getElementById('detailsPopup').classList.remove('show');
+    });
+</script>
