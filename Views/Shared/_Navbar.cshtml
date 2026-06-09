@@ -1,0 +1,87 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+	@{
+	var user = await UserManager.GetUserAsync(User);
+
+	var fullName = user.FullName;
+	var email = user.Email;
+	var imageUrl = string.IsNullOrEmpty(user?.ImageUrl)
+	? "/images/default-profile-img.jpg"
+	: $"/images/user/{user.ImageUrl}";
+	var userName = user.UserName;
+	ViewData["Title"] = "Feed";
+	}
+<link rel="stylesheet" href="/css/navbar.css"></link>
+	<nav class="navbar">
+		<a href="/Home" class="logo">Connect<span>Hub</span></a>
+		<div class="nav-links">
+			<a href="/Home" class="nav-icon active" title="Home">
+				<i class="fa-solid fa-house"></i>
+			</a>
+			<a href="/Search" class="nav-icon" title="Search">
+				<i class="fa-solid fa-magnifying-glass"></i>
+			</a>
+			<a href="/Notifications" class="nav-icon" title="Notifications">
+				<i class="fa-solid fa-bell"></i>
+				<span class="badge">3</span>
+			</a>
+			<button class="avatar-btn" id="avatarBtn" aria-label="Open profile menu" aria-haspopup="true"
+				aria-expanded="false">
+				<img src="@imageUrl" alt="@fullName" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+			</button>
+		</div>
+		<div class="dropdown" id="dropdown" role="menu" aria-label="Profile menu">
+			<div class="dropdown-header">
+				<div class="dropdown-avatar">
+					<img src="@imageUrl" alt="@fullName"
+						style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+				</div>
+				<div>
+					<div class="dropdown-name">@fullName</div>
+					<div class="dropdown-email">@@@userName</div>
+				</div>
+			</div>
+			<a href="Profile/@userName" class="dropdown-item" role="menuitem">
+				<i class="fa-solid fa-user"></i> View profile
+			</a>
+			<a href="/Settings" class="dropdown-item" role="menuitem">
+				<i class="fa-solid fa-gear"></i> Settings
+			</a>
+			<a href="/Saved" class="dropdown-item" role="menuitem">
+				<i class="fa-solid fa-bookmark"></i> Saved posts
+			</a>
+			<form action="/Account/Logout" method="post" style="margin:0;">
+				@Html.AntiForgeryToken()
+				<button type="submit" class="dropdown-item logout" role="menuitem">
+					<i class="fa-solid fa-right-from-bracket"></i> Log out
+				</button>
+			</form>
+		</div>
+	</nav>
+	<div class="overlay" id="overlay"></div>
+	<script>
+		const avatarBtn = document.getElementById('avatarBtn');
+		const dropdown = document.getElementById('dropdown');
+		const overlay = document.getElementById('overlay');
+		function openMenu() {
+			dropdown.classList.add('open');
+			overlay.classList.add('active');
+			avatarBtn.setAttribute('aria-expanded', 'true');
+		}
+		function closeMenu() {
+			dropdown.classList.remove('open');
+			overlay.classList.remove('active');
+			avatarBtn.setAttribute('aria-expanded', 'false');
+		}
+		avatarBtn.addEventListener('click', function (e) {
+			e.stopPropagation();
+			dropdown.classList.contains('open') ? closeMenu() : openMenu();
+		});
+		overlay.addEventListener('click', closeMenu);
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape') closeMenu();
+		});
+		dropdown.querySelectorAll('a.dropdown-item').forEach(function (link) {
+			link.addEventListener('click', closeMenu);
+		});
+	</script>
