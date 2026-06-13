@@ -1,5 +1,7 @@
 namespace mvc.ViewModels;
 
+using System.ComponentModel.DataAnnotations;
+
 public class EditVM
 {
     public string FirstName { get; set; }
